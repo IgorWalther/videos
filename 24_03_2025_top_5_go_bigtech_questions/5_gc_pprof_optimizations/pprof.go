@@ -4,13 +4,9 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"runtime"
-	"runtime/debug"
 )
 
 func main() {
-	debug.SetGCPercent(100)
-	debug.SetMemoryLimit(100)
-
 	runtime.SetMutexProfileFraction(1)
 	runtime.SetBlockProfileRate(1)
 	runtime.SetCPUProfileRate(1)
