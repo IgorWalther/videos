@@ -42,6 +42,8 @@ func main() {
 			}
 		}
 
+		defer response.Body.Close()
+
 		if response.StatusCode != http.StatusOK {
 			return result{
 				url: currentUrl,
