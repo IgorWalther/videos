@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  leak:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1000000M
+    ports:
+      - "8080:8080"
+    depends_on:
+      pyroscope:
+        condition: service_started
+    networks:
+      - internal
+
+  pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - "4040:4040"
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

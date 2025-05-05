@@ -1,0 +1,34 @@
+100 action
+POST /v1/action HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: tank
+Accept: */*
+Connection: Close
+
+100 action
+POST /v1/action HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: tank
+Accept: */*
+Connection: Close
+
+100 action
+POST /v1/action HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: tank
+Accept: */*
+Connection: Close
+
+100 action
+POST /v1/action HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: tank
+Accept: */*
+Connection: Close
+
+100 action
+POST /v1/action HTTP/1.1
+Host: 127.0.0.1:8080
+User-Agent: tank
+Accept: */*
+Connection: Close

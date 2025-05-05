@@ -1,0 +1,20 @@
+pools:
+  - id: HTTP pool
+    gun:
+      type: http
+      target: 127.0.0.1:8080
+    ammo:
+      type: raw
+      chosencases: [ "action" ]
+      file: ./ammo.txt
+    result:
+      type: phout
+      destination: ./phout.log
+    rps:
+      type: line
+      from: 5
+      to: 7
+      duration: 60s
+    startup:
+      type: once
+      times: 7
