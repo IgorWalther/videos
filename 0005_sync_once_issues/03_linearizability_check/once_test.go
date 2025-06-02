@@ -18,22 +18,22 @@ const (
 )
 
 var modelOnce = porcupine.Model{
-	Init: func() interface{} { return reservedValue },
-	Step: func(state interface{}, input, output interface{}) (bool, interface{}) {
+	Init: func() any { return reservedValue },
+	Step: func(state any, input, output any) (bool, any) {
 		if state == reservedValue {
 			return true, output
 		}
 
 		return output.(int64) == expectedValue, output
 	},
-	Equal: func(a, b interface{}) bool { return a == b },
-	DescribeOperation: func(input, output interface{}) string {
+	Equal: func(a, b any) bool { return a == b },
+	DescribeOperation: func(input, output any) string {
 		return fmt.Sprintf("Once() -> '%d'", output.(int64))
 	},
 }
 
 func TestBrokenOnce_RealViolation(t *testing.T) {
-	o := myOnce{}
+	o := sync.Once{}
 
 	events := make([]porcupine.Operation, 0, 4)
 	eventsMx := new(sync.Mutex)
