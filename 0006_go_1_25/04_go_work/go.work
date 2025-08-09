@@ -1,0 +1,6 @@
+go 1.25rc3
+
+use (
+	./service-a
+	./service-b
+)

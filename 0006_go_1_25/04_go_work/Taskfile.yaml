@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  test_old:
+    desc: Old way
+    cmds:
+      - go test ./service-a/... service-b/...
+
+  test_new:
+    desc: New way
+    cmds:
+      - go test work

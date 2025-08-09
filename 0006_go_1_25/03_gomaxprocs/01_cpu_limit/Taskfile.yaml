@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  run_1:
+    desc: Run
+    cmds:
+      - (GOOS=linux GOARCH=amd64 go build -o gomaxprocs-demo ./main.go)
+      - docker build -t gomaxprocs-demo .
+      - docker run --rm gomaxprocs-demo
+      - rm ./gomaxprocs-demo
+
+  run_2:
+    desc: Run
+    cmds:
+      - (GOOS=linux GOARCH=amd64 go build -o gomaxprocs-demo ./main.go)
+      - docker build -t gomaxprocs-demo .
+      - docker run --rm --cpus=0.5 gomaxprocs-demo
+      - rm ./gomaxprocs-demo

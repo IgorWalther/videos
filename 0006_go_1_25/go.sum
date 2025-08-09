@@ -1,7 +1,3 @@
-github.com/alex-azh/tg v1.0.5 h1:gW0sghv4LP88/OKATgcefUxDFVrM8DjQE3szU+R/dmo=
-github.com/alex-azh/tg v1.0.5/go.mod h1:uc90jLUmF5InC5FUGNnS6w+uQriM6RmILr6WnA0/QA0=
-github.com/anishathalye/porcupine v1.0.3 h1:0V+ZTHPjWUhYhiVaksoBFKfmBvoJrM3BXLQKGqPqiHM=
-github.com/anishathalye/porcupine v1.0.3/go.mod h1:WM0SsFjWNl2Y4BqHr/E/ll2yY1GY1jqn+W7Z/84Zoog=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
