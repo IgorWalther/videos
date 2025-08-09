@@ -23,7 +23,7 @@ func BenchmarkAllocSmall(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			result = allocSmallObjects(1_00)
+			result = allocSmallObjects(100)
 		}
 	})
 }

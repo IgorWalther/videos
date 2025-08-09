@@ -2,10 +2,6 @@ package main
 
 import "runtime"
 
-// Изменение числа ядер на машине
-// Изменение привязки приложения к ядрам CPU
-// Лимит пропускной способности, основанный на квотах CPU cgroup (linux)
-
 // Sharded data structures by GOMAXPROCS ???
 
 func main() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	_ "unsafe"
 )
 
 // but avoids unnecessary memory allocations

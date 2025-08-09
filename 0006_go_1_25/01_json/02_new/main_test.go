@@ -15,6 +15,9 @@ type person struct {
 	Metadata map[int]any
 }
 
+// jsontext.Encoder
+// jsontext.Decoder
+
 func BenchmarkJson(b *testing.B) {
 	b.Run("marshal", func(b *testing.B) {
 		b.ReportAllocs()
