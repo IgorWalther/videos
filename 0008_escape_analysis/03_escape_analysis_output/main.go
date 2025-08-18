@@ -9,7 +9,6 @@ import (
 func main() {}
 
 // go build -gcflags='-m=4' .
-
 // ./main.go:37:3:[1] estimatePgxArgSize stmt: return len(fmt.Sprintf("%v", ... argument...))
 // ./main.go:21:25: parameter arg leaks to {heap} for estimatePgxArgSize with derefs=0:
 // ./main.go:21:25:   flow: {storage for ... argument} ← arg:

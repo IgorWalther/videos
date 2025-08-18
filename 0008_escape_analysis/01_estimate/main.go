@@ -29,6 +29,6 @@ func estimatePgxArgSize(arg any) int {
 
 func main() {
 	fmt.Println(estimatePgxArgSize(1))                                     // 8
-	fmt.Println(estimatePgxArgSize("Hello, @igoroutine"))                  // 1
+	fmt.Println(estimatePgxArgSize("Hello, @igoroutine"))                  // 18
 	fmt.Println(estimatePgxArgSize(map[string]any{"hello": "igoroutine"})) // 21
 }
