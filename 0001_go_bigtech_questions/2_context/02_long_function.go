@@ -16,7 +16,7 @@ func main() {
 }
 
 func callLongFunction(ctx context.Context) (int, error) {
-	result := make(chan int)
+	result := make(chan int, 1)
 
 	go func() {
 		defer close(result)
