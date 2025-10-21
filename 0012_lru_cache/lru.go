@@ -112,4 +112,20 @@ func (c *cacheImpl[K, V]) All() iter.Seq2[K, V] {
 		}
 	}
 }
-	
+
+func main() {
+	// Example usage
+	cache := New[int, string](2, "")
+
+	cache.Put(1, "one")
+	cache.Put(2, "two")
+	println(cache.Get(1)) // Output: one
+
+	cache.Put(3, "three") // Evicts key 2
+	println(cache.Get(2)) // Output: (empty string)
+
+	cache.Put(4, "four")  // Evicts key 1
+	println(cache.Get(1)) // Output: (empty string)
+	println(cache.Get(3)) // Output: three
+	println(cache.Get(4)) // Output: four
+}
