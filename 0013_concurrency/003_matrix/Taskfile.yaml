@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  bench:
+    cmds:
+      - go test -bench=. -gcflags='-N -l' ./...
