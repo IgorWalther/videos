@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  perftests:
+    desc: "Run performance tests"
+    cmds:
+      - go test -tags=model_test -v -race ./...
+
+  modeltests:
+    desc: "Run performance tests"
+    cmds:
+      - go test -tags=performance_test -v -race ./...

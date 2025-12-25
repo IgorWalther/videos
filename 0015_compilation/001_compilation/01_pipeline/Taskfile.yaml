@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  ssabuild:
+    desc: Build with GOSSAFUNC
+    cmds:
+      - |
+        (GOSSAFUNC=main go build main.go)

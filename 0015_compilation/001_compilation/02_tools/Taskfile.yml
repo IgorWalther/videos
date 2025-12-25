@@ -1,0 +1,23 @@
+version: "3"
+
+tasks:
+  simple:
+    desc: "Simple compilation"
+    cmds:
+      - go build -o app .
+
+  manual:
+    desc: "Manual compilation"
+    cmds:
+      - go tool compile -pack -o adder/add.a -p example.com/demo/adder adder/add.go
+      - go list -deps -export -f 'packagefile {{.ImportPath}}={{.Export}}' . | sed '/=$/d' > std.importcfg
+      - echo "packagefile example.com/demo/adder=$(pwd)/adder/add.a" > importcfg.final
+      - cat std.importcfg >> importcfg.final
+      - go tool compile -importcfg importcfg.final -o main.o -p main main.go
+      - go tool link -importcfg importcfg.final -o app main.o
+
+  info:
+    desc: "Object file info"
+    cmds:
+      - go tool nm main.o
+      - go tool objdump main.o

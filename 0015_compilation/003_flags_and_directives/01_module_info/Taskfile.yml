@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  build:
+    desc: "Build main.go"
+    cmds:
+      - go build -o app main.go
+
+  info:
+    desc: "Info"
+    cmds:
+      - go version -m ./app

@@ -1,0 +1,24 @@
+-N
+    Disable optimizations.
+
+-l
+    Disable inlining.
+
+//go:noescape
+
+-race (tsan)
+//go:norace
+
+-msan
+-asan
+
+//go:uintptrescapes
+//go:nosplit
+//go:noinline
+//go:linkname
+
+-cpuprofile
+-memprofile
+-blockprofile
+-mutexprofile
+-traceprofile
