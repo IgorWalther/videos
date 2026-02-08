@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  run_old:
+    desc: Run old
+    cmds:
+      - |
+        /Users/igorwalther/go/go1.25.1/bin/go version
+        GOROOT=/Users/igorwalther/go/go1.25.1 \
+        /Users/igorwalther/go/go1.25.1/bin/go test -bench=. -benchmem ./... \
+        | tee go1_25.txt
+
+  run_new:
+    desc: Run new
+    cmds:
+      - |
+        /Users/igorwalther/go/go1.26rc3/bin/go version
+        GOROOT=/Users/igorwalther/go/go1.26rc3 \
+        GOEXPERIMENT=sizespecializedmalloc \
+        /Users/igorwalther/go/go1.26rc3/bin/go test -bench=. -benchmem ./... \
+        | tee go1_26.txt
+
+  run:
+    cmds:
+      - task: run_old
+      - task: run_new
