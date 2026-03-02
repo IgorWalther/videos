@@ -1,0 +1,142 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: false
+  allow-parallel-runners: true
+  go: '1.25'
+
+output:
+  formats:
+    - format: colored-line-number
+      path: stderr
+  print-issued-lines: true
+  print-linter-name: true
+  show-stats: true
+
+linters-settings:
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+  nestif:
+    min-complexity: 7
+  govet:
+    enable:
+      - shadow
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  nakedret:
+    max-func-lines: 25
+  gocyclo:
+    min-complexity: 10
+  gocognit:
+    min-complexity: 10
+  mnd:
+    ignored-numbers:
+      - '10'
+      - '64'
+      - '2'
+      - '4'
+  exhaustive:
+    default-signifies-exhaustive: true
+
+linters:
+  disable-all: true
+  enable:
+    - revive
+    - govet
+    - errcheck
+    - ineffassign
+    - typecheck
+    - goconst
+    - goimports
+    - gosimple
+    - staticcheck
+    - unused
+    - paralleltest
+    - errname
+    - makezero
+    - predeclared
+    - thelper
+    - unconvert
+    - unparam
+    - whitespace
+    - mnd
+    - bodyclose
+    - gofmt
+    - goprintffuncname
+    - nestif
+    - wastedassign
+    - mirror
+    - nilnil
+    - nosprintfhostport
+    - gocritic
+    - bidichk
+    - containedctx
+    - perfsprint
+    - prealloc
+    - protogetter
+    - usetesting
+    - testifylint
+    - tparallel
+    - usestdlibvars
+    - nolintlint
+
+issues:
+  exclude-use-default: false
+  exclude-dirs:
+    - \.\/\.cache\/.*
+    - bin
+    - vendor
+    - var
+    - tmp
+    - .*/go/src/.*
+  exclude-files:
+    - \.pb\.go$
+    - \.pb\.gw\.go$
+    - \.pb\.scratch\.go$
+    - \.pb\.goclay\.go$
+    - \.pb\.validate\.go$
+    - \_mock_test\.go$
+    - integration_test\.go$
+    - doc.go$
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - perfsprint
+    - text: should check error returned from .* before deferring .*\.Close()
+      linters:
+        - staticcheck
+    - path: _test\.go
+      text: "unused-parameter: parameter '.*' seems to be unused, consider removing or renaming it as _"
+      linters:
+        - revive
+    - path: _test\.go
+      linters:
+        - gosec
+        - dupl
+        - mnd
+        - containedctx
+  exclude:
+    # EXC0001 errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+    # EXC0002 golint: Annoying issue about not having a comment. The rare codebase has such comments
+    - (comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)
+    # EXC0008 gosec: Duplicated errcheck checks
+    - (G104|G307)
+    # EXC0009 gosec: Too many issues in popular repos
+    - (Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)
+    # EXC0010 gosec: False positive is triggered by 'src, err := ioutil.ReadFile(filename)'
+    - Potential file inclusion via variable
+    # EXC0011 stylecheck: Annoying issue about not having a comment. The rare codebase has such comments
+    - (comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)
+    # EXC0012 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - exported (.+) should have comment( \(or a comment on this block\))? or be unexported
+    # EXC0013 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - package comment should be of the form "(.+)...
+    # EXC0014 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - comment on exported (.+) should be of the form "(.+)..."
+    # EXC0015 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - should have a package comment, unless it's in another file for this package
+    - don't use an underscore in package name
+    - exported (.+) returns unexported type (.+) which can be annoying to use

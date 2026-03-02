@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+package orders.v1;
+
+option go_package = "github.com/igoroutine-courses/the_nature_of_microservices/orders/pkg/api/orders/v1;ordersv1";
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/orders"
+      body: "*"
+    };
+  }
+
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {
+    option (google.api.http) = {
+      get: "/v1/orders/{order_id=*}"
+    };
+  }
+
+  // TODO: как жить с REST UI?
+  // see github pagination
+
+  rpc ListUserOrders(ListUserOrdersRequest) returns (stream Order) {
+    option (google.api.http) = {
+      get: "/v1/users/{user_id=*}/orders:watch"
+    };
+  }
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_CREATED = 1;
+  ORDER_STATUS_IN_PROGRESS = 2;
+  ORDER_STATUS_PROCESSED = 3;
+
+  reserved 4, 5;
+  reserved "ORDER_STATUS_CANCELLED";
+}
+
+message Order {
+  string id = 1 [
+    (validate.rules).string.uuid = true,
+    json_name = "id"
+  ];
+
+  string user_id = 2 [
+    (validate.rules).string.uuid = true,
+    json_name = "userId"
+  ];
+
+  OrderStatus status = 3 [
+    (validate.rules).enum = {not_in: [0]},
+    json_name = "status"
+  ];
+
+  google.protobuf.Timestamp created_at = 4 [
+    json_name = "createdAt"
+  ];
+}
+
+message CreateOrderRequest {
+  string user_id = 2 [
+    (validate.rules).string.uuid = true,
+    json_name = "userId"
+  ];
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+}
+
+message GetOrderRequest {
+  string order_id = 1 [(validate.rules).string.uuid = true];
+}
+
+message GetOrderResponse {
+  Order order = 1;
+}
+
+message ListUserOrdersRequest {
+  string user_id = 1 [(validate.rules).string.uuid = true];
+}

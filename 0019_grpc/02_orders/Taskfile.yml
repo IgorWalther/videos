@@ -1,0 +1,82 @@
+version: "3"
+
+vars:
+  LOCAL_BIN: "{{.TASKFILE_DIR}}/bin"
+  EASYP_BIN: "{{.LOCAL_BIN}}/easyp"
+  GOIMPORTS_BIN: "{{.LOCAL_BIN}}/goimports"
+
+tasks:
+  default:
+    desc: Build + generate
+    cmds:
+      - task: build
+      - task: generate
+
+  build:
+    desc: Build
+    cmds:
+      - go build -o ./bin/orders ./cmd/orders/
+
+  create-bin:
+    internal: true
+    desc: Recreate ./bin
+    cmds:
+      - rm -rf ./bin
+      - mkdir -p ./bin
+
+  install-protoc:
+    desc: Install protoc (platform-specific)
+    cmds:
+      - |
+        set -euo pipefail
+        if [ "$(uname -s)" = "Darwin" ]; then
+          # macOS (arm64 or amd64) — Homebrew
+          command -v brew >/dev/null 2>&1 || { echo "brew not found"; exit 1; }
+          brew install protobuf
+        else
+          # Linux — apt
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+        fi
+
+  bin-deps:
+    desc: Install local Go tools into ./bin (GOBIN)
+    deps: [create-bin, install-protoc]
+    env:
+      GOBIN: "{{.LOCAL_BIN}}"
+    cmds:
+      - go install github.com/easyp-tech/easyp/cmd/easyp@v0.12.4
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.18.1
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.18.1
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+      - go install golang.org/x/tools/cmd/goimports@v0.19.0
+
+  fast-generate:
+    desc: Generate code (assumes deps already installed)
+    cmds:
+      - task: _generate
+
+  generate:
+    desc: Install deps + generate code
+    deps: [bin-deps]
+    cmds:
+      - task: _generate
+
+  _generate:
+    internal: true
+    desc: easyp generate + goimports
+    cmds:
+      - echo "Generating code..."
+      - rm -rf ./generated && mkdir -p ./generated
+      - rm -rf ./docs/spec && mkdir -p ./docs/spec
+      - rm -rf ~/.easyp/
+      - |
+        set -euo pipefail
+        PATH="{{.LOCAL_BIN}}:${PATH}" \
+          "{{.EASYP_BIN}}" mod download
+      - |
+        set -euo pipefail
+        PATH="{{.LOCAL_BIN}}:${PATH}" \
+          "{{.EASYP_BIN}}" generate
+      - "{{.GOIMPORTS_BIN}} -w ."
