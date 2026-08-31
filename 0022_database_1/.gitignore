@@ -1,0 +1,14 @@
+.idea
+*_test.go
+*.txt
+/bin
+/generated
+/cover.out
+/cover.out.tmp
+.env
+README.md
+/docs/spec
+node_modules
+dist
+pkg/generated
+cart

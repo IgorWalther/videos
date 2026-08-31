@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package github.com.igoroutine_courses.microservices.ecommerce.stocks.v1;
+
+option go_package = "github.com/igoroutine-courses/microservices.ecommerce.pkg/generated/loms/api/stocks/v1;stocks";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/descriptor.proto";
+import "validate/validate.proto";
+
+service Stocks {
+  rpc GetStock(GetStockRequest) returns (GetStockResponse) {
+    option (google.api.http) = {
+      post: "/v1/stock/info"
+      body: "*"
+    };
+  }
+
+  rpc SetStock(SetStockRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/stock/set"
+      body: "*"
+    };
+  }
+}
+
+message SetStockRequest {
+  uint32 sku = 1 [(validate.rules).uint32 = {gte: 1}];
+  uint64 count = 2;
+}
+
+message GetStockRequest{
+  uint32 sku = 1 [(validate.rules).uint32 = {gte: 1}];
+}
+message GetStockResponse{
+  uint64 count = 1;
+}

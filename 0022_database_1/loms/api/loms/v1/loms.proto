@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package github.com.igoroutine_courses.microservices.ecommerce.loms.v1;
+
+option go_package = "github.com/igoroutine-courses/microservices.ecommerce.pkg/generated/loms/api/loms/v1;loms";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/descriptor.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+service Loms {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/order/create"
+      body: "*"
+    };
+  }
+
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/order/info"
+      body: "*"
+    };
+  }
+
+  rpc PayOrder(PayOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/order/pay"
+      body: "*"
+    };
+  }
+
+  rpc CancelOrder(CancelOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/v1/order/cancel"
+      body: "*"
+    };
+  }
+}
+
+// TODO: тест на валидацию, убрать её
+
+message Item {
+  uint32 sku = 1 [(validate.rules).uint32 = {gte: 0}];
+  uint32 count = 2 [(validate.rules).uint32 = {lte: 65536}];
+}
+
+message CreateOrderRequest{
+  int64 user_id = 1 [(validate.rules).int64 = {gte: 0}];
+  repeated Item items = 2 [(validate.rules).repeated = {min_items: 1}];
+}
+
+message CreateOrderResponse{
+  int64 order_id = 1 [(validate.rules).int64 = {gte: 0}];
+}
+
+message GetOrderRequest{
+  int64 order_id = 1 [(validate.rules).int64 = {gte: 0}];
+}
+
+message GetOrderResponse{
+  OrderStatus status = 1;
+  int64 user_id = 2 [(validate.rules).int64 = {gte: 0}];
+  repeated Item items = 3 [(validate.rules).repeated = {min_items: 1}];
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message PayOrderRequest{
+  int64 order_id = 1 [(validate.rules).int64 = {gte: 0}];
+}
+
+message CancelOrderRequest{
+  int64 order_id = 1 [(validate.rules).int64 = {gte: 0}];
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_NEW = 1;
+  ORDER_STATUS_AWAITING_PAYMENT = 2;
+  ORDER_STATUS_AWAITING_FAILED = 3;
+  ORDER_STATUS_AWAITING_PAID = 4;
+  ORDER_STATUS_AWAITING_CANCELLED = 5;
+}

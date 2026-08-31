@@ -1,0 +1,213 @@
+version: "3"
+
+vars:
+  LOCAL_BIN: '{{.ROOT_DIR}}/bin'
+  EASYP_BIN: "{{.LOCAL_BIN}}/easyp"
+  GOIMPORTS_BIN: "{{.LOCAL_BIN}}/goimports"
+  GOLANGCI_LINT_VERSION: 'v1.64.5'
+
+tasks:
+  up:
+    docker-compose -f docker-compose.yml up --build -d
+
+  down:
+    docker-compose -f docker-compose.yml down -v --remove-orphans || true
+
+  test:
+    desc: "Run all tests"
+    cmds:
+      - |
+        docker-compose -f docker-compose.yml down -v --remove-orphans || true
+
+        docker-compose \
+          -f docker-compose.ci.yml \
+          -f docker-compose.test.yml \
+          up \
+          --build \
+          --abort-on-container-exit \
+          --exit-code-from integration-tests
+
+  update:
+    desc: "Update tests"
+    requires:
+      vars: [ hw ]
+    cmds:
+      - go run .github/update.go -hw {{.hw}}
+
+  force-update:
+    desc: "Force update tests"
+    aliases: [ "force_update", "fu" ]
+    requires:
+      vars: [ hw ]
+    cmds:
+      - go run .github/update.go -force -hw {{.hw}}
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - |
+        if [ "${OS:-}" = "Windows_NT" ]; then
+          LINT="{{.LOCAL_BIN}}/golangci-lint.exe"
+        
+          if [ ! -f "$LINT" ]; then
+            echo "golangci-lint not found. Installing..."
+            mkdir -p "{{.LOCAL_BIN}}"
+            GOBIN="{{.LOCAL_BIN}}" go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.GOLANGCI_LINT_VERSION}}
+          fi
+        
+          echo "Running golangci-lint..."
+          "$LINT" run --config=.golangci.yaml --sort-results
+        else 
+          if [ ! -x "{{.LOCAL_BIN}}/golangci-lint" ]; then
+            echo "golangci-lint not found. Installing..."
+            mkdir -p "{{.LOCAL_BIN}}"
+            GOBIN="{{.LOCAL_BIN}}" go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.GOLANGCI_LINT_VERSION}}
+          fi
+        
+          echo "Running golangci-lint..."
+          "{{.LOCAL_BIN}}/golangci-lint" run --config=.golangci.yaml --sort-results
+        fi
+
+  repo-update:
+    silent: true
+    cmds:
+      - |
+        set -euo pipefail
+
+        if [ -n "$(git status --untracked-files=no --porcelain)" ]; then
+          echo 'You have some changes. Please commit, checkout or stash them.'
+          exit 1
+        fi
+
+        current_branch="$(git branch --show-current)"
+        echo "Current branch: $current_branch"
+
+        git checkout main
+        git pull
+
+        for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
+          git checkout "$branch"
+
+          if ! git rev-parse --symbolic-full-name @{u} >/dev/null 2>&1; then
+            if git ls-remote --heads origin "$branch" | grep -q .; then
+              echo "Upstream exists for $branch. Setting upstream to origin/$branch."
+              git branch --set-upstream-to="origin/$branch"
+            else
+              echo "Upstream not found for $branch. Pushing and setting upstream to origin/$branch."
+              git push --set-upstream origin "$branch"
+              git branch --set-upstream-to="origin/$branch"
+            fi
+          fi
+
+          git pull --rebase
+          git push -f
+          git rebase main
+          git push -f
+        done
+
+        git checkout "$current_branch"
+        echo 'Successfully updated'
+
+  build:
+    desc: Build
+    cmds:
+      - go build -o ./bin/app ./cmd/app/
+
+  create-bin:
+    internal: true
+    desc: Recreate ./bin
+    cmds:
+      - rm -rf ./bin
+      - mkdir -p ./bin
+
+  install-protoc:
+    desc: Install protoc (platform-specific)
+    cmds:
+      - |
+        set -euo pipefail
+        if [ "$(uname -s)" = "Darwin" ]; then
+          command -v brew >/dev/null 2>&1 || { echo "brew not found"; exit 1; }
+          brew install protobuf
+        else
+          if command -v sudo >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y protobuf-compiler
+          else
+            apt-get update
+            apt-get install -y protobuf-compiler
+          fi
+        fi
+
+  bin-deps:
+    desc: Install local Go tools into ./bin (LOCAL_BIN)
+    deps: [create-bin, install-protoc]
+    env:
+      GOBIN: "{{.LOCAL_BIN}}"
+    cmds:
+      - go install github.com/easyp-tech/easyp/cmd/easyp@v0.12.4
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.18.1
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.18.1
+      - go install github.com/envoyproxy/protoc-gen-validate@v1.2.1
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+      - go install golang.org/x/tools/cmd/goimports@v0.19.0
+      - go install go.uber.org/mock/mockgen@latest
+
+  fast-generate:
+    desc: Generate code (assumes deps already installed)
+    cmds:
+      - task: _generate
+
+  generate:
+    desc: Install deps + generate code
+    deps: [bin-deps]
+    cmds:
+      - task: _generate
+
+  _generate:
+    internal: true
+    desc: easyp generate + goimports
+    cmds:
+      - echo "Generating code..."
+      - rm -rf ./pkg/generated && mkdir -p ./pkg/generated
+      - rm -rf ./docs/spec && mkdir -p ./docs/spec
+      - rm -rf ~/.easyp/
+      - |
+        set -euo pipefail
+        PATH="{{.LOCAL_BIN}}:${PATH}" \
+          "{{.EASYP_BIN}}" mod download
+      - |
+        set -euo pipefail
+        PATH="{{.LOCAL_BIN}}:${PATH}" \
+          "{{.EASYP_BIN}}" generate
+      - |
+        echo "Running go generate in workspace modules..."
+        go work edit -json | jq -r '.Use[].DiskPath' | while IFS= read -r mod; do
+          echo " -> $mod"
+          (
+            cd "$mod"
+            export PATH="{{.LOCAL_BIN}}:${PATH}"
+            export GOBIN="{{.LOCAL_BIN}}"
+            go generate ./...
+            go mod tidy
+          )
+        done
+
+  frontend:
+    desc: "Run frontend"
+    cmds:
+      - |
+        (cd ./frontend && npm run dev)
+
+  backend:
+    desc: "Run backend"
+    cmds:
+      - |
+        docker-compose \
+          -f docker-compose.yml \
+          down -v --remove-orphans || true
+
+        docker-compose -f docker-compose.yml up --build
+
+  pgdump:
+    PGPASSWORD=12345 pg_dump -h localhost -p 5432 -U loms -d loms > dump.sql

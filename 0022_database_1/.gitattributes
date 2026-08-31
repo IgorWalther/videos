@@ -1,0 +1,10 @@
+**/*.pb.go -diff -text
+**/*.pb.*.go -diff -text
+**/*_mock_test.go -diff -text
+**/swagger.go -diff -text
+**/*.swagger.go -diff -text
+**/*.swagger.json -diff -text
+**/go.sum -diff -text
+**/easyp.lock -diff -text
+pkg/* -diff -text
+**/README.md -diff -text
